@@ -6,15 +6,20 @@ namespace Lesson5.Code.Commands
 {
     public class MoveCommand : ICommand
     {
-        IMovable _movable;
-        public MoveCommand(IMovable movable)
+        IMovable _target;
+        public MoveCommand(IMovable target)
         {
-            _movable = movable;
+            if(target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            _target = target;
         }
 
         public void Execute()
         {
-            _movable.Position += _movable.Velocity;
+            _target.Position += _target.Velocity;
         }
     }
 }

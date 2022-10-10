@@ -17,9 +17,15 @@ namespace Lesson5.Tests
             movable.Position = new Vector2(12, 5);
 
             var command = new MoveCommand(movable);
-            command.Execute();
 
+            Assert.DoesNotThrow(() => command.Execute());
             Assert.That(movable.Position == new Vector2(5, 8));
+        }
+
+        [Test]
+        public void NullReferenceTest()
+        {
+            Assert.Throws<ArgumentNullException>(() => new MoveCommand(null));
         }
 
         [Test]

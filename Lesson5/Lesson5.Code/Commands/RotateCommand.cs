@@ -6,25 +6,28 @@ namespace Lesson5.Code.Commands
 {
     public class RotateCommand : ICommand
     {
-        IRotatable _rotatable;
-        IGameProperties _gameProperties;
+        IRotatable _target;
 
-        public RotateCommand(IRotatable rotatable, IGameProperties gameProperties)
+        public RotateCommand(IRotatable target)
         {
-            _rotatable = rotatable;
-            _gameProperties = gameProperties;
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            _target = target;
         }
 
         public void Execute()
         {
-            var result = (_rotatable.Direction + _rotatable.AngularVelocity) % _gameProperties.DirectionsNumber;
+            var result = (_target.Direction + _target.AngularVelocity) % _target.DirectionsNumber;
 
             if (result < 0)
             {
-                result = _gameProperties.DirectionsNumber + result;
+                result = _target.DirectionsNumber + result;
             }
 
-            _rotatable.Direction = (uint)result;
+            _target.Direction = (uint)result;
         }
     }
 }

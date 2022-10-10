@@ -8,5 +8,6 @@ namespace Lesson5.Code
     {
         uint Direction { get; set; }
         int AngularVelocity { get; }
+        int DirectionsNumber { get; }
     }
 }

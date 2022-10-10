@@ -24,37 +24,29 @@ namespace Lesson5.Tests
         [TestCase(0u, 0, 0u)] // Проверка при 0
         public void RotateTest(uint initRotation, int angularVelocity, uint resultRotation)
         {
-            var gamePropsMock = new Mock<IGameProperties>();
-            gamePropsMock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
-            var gameProps = gamePropsMock.Object;
+            var mock = new Mock<IRotatable>();
+            mock.SetupAllProperties();
+            mock.Setup(x => x.AngularVelocity).Returns(angularVelocity);
+            mock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
 
-            var rotatableMock = new Mock<IRotatable>();
-            rotatableMock.SetupAllProperties();
-            rotatableMock.Setup(x => x.AngularVelocity).Returns(angularVelocity);
-
-            var rotatable = rotatableMock.Object;
+            var rotatable = mock.Object;
             rotatable.Direction = initRotation;
 
-            var command = new RotateCommand(rotatable, gameProps);
-            command.Execute();
+            var command = new RotateCommand(rotatable);
 
+            Assert.DoesNotThrow(() => command.Execute());
             Assert.That(rotatable.Direction == resultRotation);
         }
 
         [Test]
         public void SetDirectionTest()
         {
-            var gamePropsMock = new Mock<IGameProperties>();
-            gamePropsMock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
-            var gameProps = gamePropsMock.Object;
+            var mock = new Mock<IRotatable>();
+            mock.SetupAllProperties();
+            mock.SetupGet(x => x.Direction).Throws<Exception>();
+            mock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
 
-            var rotatableMock = new Mock<IRotatable>();
-            rotatableMock.SetupAllProperties();
-            rotatableMock.SetupGet(x => x.Direction).Throws<Exception>();
-
-            var rotatable = rotatableMock.Object;
-
-            var command = new RotateCommand(rotatable, gameProps);
+            var command = new RotateCommand(mock.Object);
 
             Assert.Throws<Exception>(() => command.Execute());
         }
@@ -62,35 +54,31 @@ namespace Lesson5.Tests
         [Test]
         public void GetDirectionTest()
         {
-            var gamePropsMock = new Mock<IGameProperties>();
-            gamePropsMock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
-            var gameProps = gamePropsMock.Object;
+            var mock = new Mock<IRotatable>();
+            mock.SetupAllProperties();
+            mock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
+            mock.SetupGet(x => x.Direction).Throws<Exception>();
 
-            var rotatableMock = new Mock<IRotatable>();
-            rotatableMock.SetupAllProperties();
-            rotatableMock.SetupGet(x => x.Direction).Throws<Exception>();
-
-            var rotatable = rotatableMock.Object;
-
-            var command = new RotateCommand(rotatable, gameProps);
+            var command = new RotateCommand(mock.Object);
 
             Assert.Throws<Exception>(() => command.Execute());
         }
 
         [Test]
+        public void NullReferenceTest()
+        {
+            Assert.Throws<ArgumentNullException>(()=> new RotateCommand(null));
+        }
+
+        [Test]
         public void GetAngularVelocityTest()
         {
-            var gamePropsMock = new Mock<IGameProperties>();
-            gamePropsMock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
-            var gameProps = gamePropsMock.Object;
+            var mock = new Mock<IRotatable>();
+            mock.SetupAllProperties();
+            mock.Setup(x => x.DirectionsNumber).Returns(DIRECTIONS_NUMBER);
+            mock.SetupGet(x => x.AngularVelocity).Throws<Exception>();
 
-            var rotatableMock = new Mock<IRotatable>();
-            rotatableMock.SetupAllProperties();
-            rotatableMock.SetupGet(x => x.AngularVelocity).Throws<Exception>();
-
-            var rotatable = rotatableMock.Object;
-
-            var command = new RotateCommand(rotatable, gameProps);
+            var command = new RotateCommand(mock.Object);
 
             Assert.Throws<Exception>(() => command.Execute());
         }
@@ -98,17 +86,10 @@ namespace Lesson5.Tests
         [Test]
         public void GetDirectionsNumberTest()
         {
-            var gamePropsMock = new Mock<IGameProperties>();
-            gamePropsMock.SetupAllProperties();
-            gamePropsMock.SetupGet(x => x.DirectionsNumber).Throws<Exception>();
-            var gameProps = gamePropsMock.Object;
-
-            var rotatableMock = new Mock<IRotatable>();
-            rotatableMock.SetupAllProperties();
-
-            var rotatable = rotatableMock.Object;
-
-            var command = new RotateCommand(rotatable, gameProps);
+            var mock = new Mock<IRotatable>();
+            mock.SetupAllProperties();
+            mock.Setup(x => x.DirectionsNumber).Throws<Exception>();
+            var command = new RotateCommand(mock.Object);
 
             Assert.Throws<Exception>(() => command.Execute());
         }
