@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-namespace Lesson9.Code
+namespace Lesson9.Code.Scopes
 {
     public class ThreadScope : IThreadScope
     {

@@ -1,4 +1,5 @@
 ﻿using Lesson9.Code;
+using Lesson9.Code.Scopes;
 
 IContainer container = new Container();
 

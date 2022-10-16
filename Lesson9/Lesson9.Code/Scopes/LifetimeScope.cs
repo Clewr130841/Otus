@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Xml.Linq;
 
-namespace Lesson9.Code
+namespace Lesson9.Code.Scopes
 {
     public class LifetimeScope : ILifetimeScope, IDisposable
     {
