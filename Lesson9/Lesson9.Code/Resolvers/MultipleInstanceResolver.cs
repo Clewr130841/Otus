@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace Lesson9.Code
+namespace Lesson9.Code.Resolvers
 {
     public class MultipleInstanceResolver : ResolverBase
     {

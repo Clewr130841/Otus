@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 
-namespace Lesson9.Code
+namespace Lesson9.Code.Resolvers
 {
     public abstract class ResolverBase
     {

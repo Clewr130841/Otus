@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Lesson9.Code
+namespace Lesson9.Code.Resolvers
 {
     public class SingleInstanceResolver : ResolverBase
     {
