@@ -164,9 +164,9 @@ namespace Lesson9.Code
                 .AsSingleton()
                 .Complete();
 
-            //Именованые скоупы, должны быть доступны из любых по вложенности скоупов, так что делаем так
+            //Именованые скоупы
             registration.Register<INamedScope>()
-                .As(c => c.CanResolve<INamedScope>() ? new NamedScope(c) : _parentContainer?.Resolve<INamedScope>() as NamedScope)
+                .As(c => new NamedScope(c))
                 .AsSingleton()
                 .Complete();
         }
