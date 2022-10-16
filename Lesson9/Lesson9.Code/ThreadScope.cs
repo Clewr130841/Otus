@@ -7,9 +7,7 @@ namespace Lesson9.Code
 {
     public class ThreadScope : IThreadScope
     {
-        IContainer _parentContainer;
         ThreadLocal<IContainer> _threadLocal;
-        private bool _disposedValue;
 
         public ThreadScope(IContainer parentContainer)
         {
