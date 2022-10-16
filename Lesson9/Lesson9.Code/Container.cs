@@ -193,6 +193,18 @@ namespace Lesson9.Code
             _resolvers[key] = constructor;
         }
 
+        private void UnregisterResolver(string name) //Оставим виртуальным, для наследников
+        {
+            var key = GetResolverKey(name);
+            _resolvers.TryRemove(key, out _);
+        }
+
+        private void UnregisterResolver(Type type) //Оставим виртуальным, для наследников
+        {
+            var key = GetResolverKey(type);
+            _resolvers.TryRemove(key, out _);
+        }
+
         private bool CanResolveInner(string key)
         {
             return _resolvers.ContainsKey(key) || (_parentContainer?.CanResolveInner(key) ?? false);
@@ -409,6 +421,21 @@ namespace Lesson9.Code
                 }
 
                 return new RegistrationOptions(type, _container);
+            }
+
+            public void Unregister<T>()
+            {
+                _container.UnregisterResolver(typeof(T));
+            }
+
+            public void Unregister(Type t)
+            {
+                _container.UnregisterResolver(t);
+            }
+
+            public void Unregister(string name)
+            {
+                _container.UnregisterResolver(name);
             }
         }
 

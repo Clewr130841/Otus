@@ -8,5 +8,9 @@ namespace Lesson9.Code
     {
         IRegistrationOption Register<T>();
         IRegistrationOption Register(Type type);
+
+        void Unregister<T>();
+        void Unregister(Type t);
+        void Unregister(string name);
     }
 }
