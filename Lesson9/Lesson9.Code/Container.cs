@@ -14,39 +14,47 @@ namespace Lesson9.Code
         /// <summary>
         /// На всякий случай конкурентный словарь, для избежания ошибок при создании и регистрации с разных потоков;
         /// </summary>
-        ConcurrentDictionary<string, ConstructorBase> _constructors;
-        List<IRegistrationOptionWithCopy> _registrationOptions;
+        ConcurrentDictionary<string, ResolverBase> _resolvers;
         private bool _disposedValue;
-        IContainer _parentContainer;
+        Container _parentContainer;
         private Container(Container container)
         {
             _parentContainer = container;
-            _constructors = new ConcurrentDictionary<string, ConstructorBase>();
-            _registrationOptions = new List<IRegistrationOptionWithCopy>();
-
-            var registrationContainer = new RegistrationContainer(this);
-
-            //Копируем все регистрации и создаем все по новой, если синглтон, это не тот синглтон, что был раньше
-            IRegistrationOptionWithCopy[] copy;
-
-            lock (container._registrationOptions)
-            {
-                copy = container._registrationOptions.Select(x => x.Copy(registrationContainer)).ToArray();
-            }
-
-            foreach (var option in copy)
-            {
-                option.Complete();
-            }
-
+            _resolvers = new ConcurrentDictionary<string, ResolverBase>();
             RegisterServiceTypesAndScope();
         }
 
         public Container()
         {
-            _registrationOptions = new List<IRegistrationOptionWithCopy>();
-            _constructors = new ConcurrentDictionary<string, ConstructorBase>();
+            _resolvers = new ConcurrentDictionary<string, ResolverBase>();
             RegisterServiceTypesAndScope();
+        }
+
+        public bool CanResolve<T>()
+        {
+            return CanResolve(typeof(T));
+        }
+
+        public bool CanResolve(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            var key = GetResolverKey(type);
+            return CanResolveInner(key);
+        }
+
+        public bool CanResolve(string name)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            var key = GetResolverKey(name);
+            return CanResolveInner(key);
         }
 
         #region IContainer
@@ -57,13 +65,16 @@ namespace Lesson9.Code
                 throw new ArgumentNullException(nameof(name));
             }
 
-            var key = GetRegistrationKey(name);
+            var key = GetResolverKey(name);
 
-            if (_constructors.TryGetValue(key, out ConstructorBase constructor))
+
+            var resolver = GetResolver(key);
+
+            if (resolver != null)
             {
                 try
                 {
-                    return constructor.Construct(args);
+                    return resolver.Resolve(args, this);
                 }
                 catch (Exception ex)
                 {
@@ -81,13 +92,14 @@ namespace Lesson9.Code
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var key = GetRegistrationKey(type);
+            var key = GetResolverKey(type);
+            var resolver = GetResolver(key);
 
-            if (_constructors.TryGetValue(key, out ConstructorBase constructor))
+            if (resolver != null)
             {
                 try
                 {
-                    return constructor.Construct(args);
+                    return resolver.Resolve(args, this);
                 }
                 catch (Exception ex)
                 {
@@ -96,6 +108,19 @@ namespace Lesson9.Code
             }
 
             throw new CantResolveContainerException($"Dependency with type \"{type.FullName}\" is not registered");
+        }
+
+        private ResolverBase GetResolver(string key)
+        {
+            if (_resolvers.TryGetValue(key, out ResolverBase constructor))
+            {
+                return constructor;
+            }
+            else if (_parentContainer != null)
+            {
+                return _parentContainer.GetResolver(key);
+            }
+            return null;
         }
 
         public T Resolve<T>(params object[] args)
@@ -113,7 +138,7 @@ namespace Lesson9.Code
         private void RegisterServiceTypesAndScope()
         {
             //Регистрируем типы по умолчанию
-            var registration = new Registration(new RegistrationContainer(this));
+            var registration = new Registration(this);
 
             //Зависимость регистрации
             registration.Register<IRegistration>()
@@ -138,32 +163,49 @@ namespace Lesson9.Code
 
             //Именованые скоупы, должны быть доступны из любых по вложенности скоупов, так что делаем так
             registration.Register<INamedScope>()
-                .As(x => _parentContainer?.Resolve<INamedScope>() as NamedScope ?? new NamedScope(x))
+                .As(c => c.CanResolve<INamedScope>() ? new NamedScope(c) : _parentContainer?.Resolve<INamedScope>() as NamedScope)
                 .AsSingleton()
                 .Complete();
         }
 
-        private string GetRegistrationKey(string name)
+        private string GetResolverKey(string name)
         {
             return $"n:{name}";
         }
 
-        private string GetRegistrationKey(Type type)
+        private string GetResolverKey(Type type)
         {
             return $"t:{type.FullName}";
         }
 
-        #region Вспомогательные классы для регистрации, чтобы получить доступ к полям внутри и запечатать интерфейс для мира снаружи
-        private class RegistrationOptions : IRegistrationOptionWithCopy
+        private void RegisterResolver(string name, ResolverBase constructor) //Оставим виртуальным, для наследников
         {
-            IRegistrationContainer _container;
+            var key = GetResolverKey(name);
+            _resolvers[key] = constructor;
+        }
+
+        private void RegisterResolver(Type type, ResolverBase constructor) //Оставим виртуальным, для наследников
+        {
+            var key = GetResolverKey(type);
+            _resolvers[key] = constructor;
+        }
+
+        private bool CanResolveInner(string key)
+        {
+            return _resolvers.ContainsKey(key) || (_parentContainer?.CanResolveInner(key) ?? false);
+        }
+
+        #region Вспомогательные классы для регистрации, чтобы получить доступ к полям внутри и запечатать интерфейс для мира снаружи
+        private class RegistrationOptions : IRegistrationOption
+        {
+            Container _container;
             string _name;
             Type _asType;
             Type _forType;
             Func<IContainer, object[], object> _constr;
             bool _isSingleton;
 
-            public RegistrationOptions(Type forType, IRegistrationContainer container)
+            public RegistrationOptions(Type forType, Container container)
             {
                 _container = container;
                 _forType = forType;
@@ -316,51 +358,37 @@ namespace Lesson9.Code
             {
                 CheckRegistration();
 
-                ConstructorBase constructor;
+                ResolverBase resolver;
 
                 // Можно было бы в методе AsSingleton вернуть новый тип, перекопировав параметры, который бы в
                 // методе Complete регистрировал SingleInstanceConstructor, но лень, потому if =))
 
                 if (_isSingleton)
                 {
-                    constructor = new SingleInstanceConstructor(_asType ?? _forType, _container, _constr);
+                    resolver = new SingleInstanceResolver(_asType ?? _forType, _constr);
                 }
                 else
                 {
-                    constructor = new MultipleInstanceConstructor(_asType ?? _forType, _container, _constr);
+                    resolver = new MultipleInstanceResolver(_asType ?? _forType, _constr);
                 }
 
                 if (string.IsNullOrEmpty(_name))
                 {
-                    _container.RegisterConstructor(_forType, constructor, this);
+                    _container.RegisterResolver(_forType, resolver);
                 }
                 else
                 {
-                    _container.RegisterConstructor(_name, constructor, this);
+                    _container.RegisterResolver(_name, resolver);
                 }
-            }
-            public IRegistrationOptionWithCopy Copy(IRegistrationContainer container)
-            {
-                if (container == null)
-                {
-                    throw new ArgumentNullException(nameof(container));
-                }
-
-                var copy = new RegistrationOptions(_forType, container);
-                copy._name = _name;
-                copy._asType = _asType;
-                copy._constr = _constr;
-                copy._isSingleton = _isSingleton;
-                return copy;
             }
             #endregion
         }
 
         private class Registration : IRegistration
         {
-            private IRegistrationContainer _container;
+            private Container _container;
 
-            public Registration(IRegistrationContainer container)
+            public Registration(Container container)
             {
                 _container = container;
             }
@@ -381,68 +409,6 @@ namespace Lesson9.Code
             }
         }
 
-        private class RegistrationContainer : IRegistrationContainer
-        {
-            Container _container;
-
-            public RegistrationContainer(Container container)
-            {
-                _container = container;
-            }
-
-            public bool CanResolve(Type type)
-            {
-                if (type == null)
-                {
-                    throw new ArgumentNullException(nameof(type));
-                }
-
-                var key = _container.GetRegistrationKey(type);
-                return _container._constructors.ContainsKey(key);
-            }
-
-            public object Resolve(string name, params object[] args)
-            {
-                return _container.Resolve(name, args);
-            }
-
-            public object Resolve(Type type, params object[] args)
-            {
-                return _container.Resolve(type, args);
-            }
-
-            public T Resolve<T>(params object[] args)
-            {
-                return _container.Resolve<T>(args);
-            }
-
-            public T Resolve<T>(string name, params object[] args)
-            {
-                return _container.Resolve<T>(name, args);
-            }
-
-            public void RegisterConstructor(string name, ConstructorBase constructor, IRegistrationOptionWithCopy options) //Оставим виртуальным, для наследников
-            {
-                var key = _container.GetRegistrationKey(name);
-                _container._constructors[key] = constructor;
-
-                lock (_container._registrationOptions)
-                {
-                    _container._registrationOptions.Add(options);
-                }
-            }
-
-            public void RegisterConstructor(Type type, ConstructorBase constructor, IRegistrationOptionWithCopy options) //Оставим виртуальным, для наследников
-            {
-                var key = _container.GetRegistrationKey(type);
-                _container._constructors[key] = constructor;
-
-                lock (_container._registrationOptions)
-                {
-                    _container._registrationOptions.Add(options);
-                }
-            }
-        }
         #endregion
 
         #region IDisposable
@@ -453,13 +419,11 @@ namespace Lesson9.Code
             {
                 if (disposing)
                 {
-                    _constructors.Clear();
-                    _registrationOptions.Clear();
+                    _resolvers.Clear();
                 }
 
                 _parentContainer = null;
-                _registrationOptions = null;
-                _constructors = null;
+                _resolvers = null;
                 _disposedValue = true;
             }
         }

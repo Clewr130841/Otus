@@ -6,17 +6,15 @@ using System.Reflection;
 
 namespace Lesson9.Code
 {
-    public abstract class ConstructorBase
+    public abstract class ResolverBase
     {
         Type _type;
-        IRegistrationContainer _container;
-        public ConstructorBase(Type type, IRegistrationContainer container)
+        public ResolverBase(Type type)
         {
             _type = type;
-            _container = container;
         }
 
-        public virtual object Construct(object[] args)
+        public virtual object Resolve(object[] args, IContainer container)
         {
             if (args == null || args.Length == 0) // Если юзверь не передал аргументов для конструктора, ищем их сами
             {
@@ -39,9 +37,9 @@ namespace Lesson9.Code
                     foreach (var param in constrParams)
                     {
                         //Если контейнер может зарезолвить тип
-                        if (_container.CanResolve(param.ParameterType))
+                        if (container.CanResolve(param.ParameterType))
                         {
-                            paramList.Add(_container.Resolve(param.ParameterType));
+                            paramList.Add(container.Resolve(param.ParameterType));
                         }
                         else if (param.HasDefaultValue) //Если есть дефолтное значение
                         {

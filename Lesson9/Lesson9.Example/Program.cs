@@ -20,11 +20,11 @@ using (var lifetimeScope = container.Resolve<ILifetimeScope>())
 }
 
 //Так получаем тред скоуп
-var threadScope = container.Resolve<ThreadScope>(); //Скоуп создается автоматом для потока
+var threadScope = container.Resolve<IThreadScope>(); //Скоуп создается автоматом для потока
 
 //Так получаем именованный скоуп, при чем неважно из какого скуопа мы получаем его, он всегда будет ссылкой на один и тот же экземпляр
 //который зареган по имени в любом из скоупов
-var namedScope = container.Resolve<NamedScope>().WithName("Test"); //Скоуп создается автоматом для имени
+var namedScope = container.Resolve<INamedScope>().WithName("Test"); //Скоуп создается автоматом для имени
 
 
 //Контейнер умеет подставлять зарегистрированные типы аргументов в конструктор, если при резолве не было передано других

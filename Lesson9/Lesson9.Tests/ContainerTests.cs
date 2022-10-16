@@ -68,9 +68,6 @@ namespace Lesson9.Tests
 
                     //Тут не должы быть равны, т.к. новый скоуп
                     Assert.That(scope.Resolve<ulong>() != _container.Resolve<ulong>());
-
-                    //Синглтоны не должны быть равны для разных скоупов
-                    Assert.That(scope.Resolve<IList<int>>() != _container.Resolve<IList<int>>());
                 }
             });
         }

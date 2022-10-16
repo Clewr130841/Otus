@@ -4,21 +4,19 @@ using System.Text;
 
 namespace Lesson9.Code
 {
-    public class SingleInstanceConstructor : ConstructorBase
+    public class SingleInstanceResolver : ResolverBase
     {
         object _instance;
         object _locker;
-        IRegistrationContainer _container;
         Func<IContainer, object[], object> _constr;
 
-        public SingleInstanceConstructor(Type type, IRegistrationContainer container, Func<IContainer, object[], object> constr = null) : base(type, container)
+        public SingleInstanceResolver(Type type, Func<IContainer, object[], object> constr = null) : base(type)
         {
             _locker = new object();
             _constr = constr;
-            _container = container;
         }
 
-        public override object Construct(object[] args)
+        public override object Resolve(object[] args, IContainer container)
         {
             if (_instance == null) //Двойная проверка для многопоточности и быстрого резолва, чтобы не лочить каждый раз
             {
@@ -30,11 +28,11 @@ namespace Lesson9.Code
                         //если их передали при первом вызове, так же, если инстанс создан, далее игнорируем все параметры
                         if (_constr == null)
                         {
-                            _instance = base.Construct(args);
+                            _instance = base.Resolve(args, container);
                         }
                         else
                         {
-                            _instance = _constr(_container, args);
+                            _instance = _constr(container, args);
                         }
                     }
                 }

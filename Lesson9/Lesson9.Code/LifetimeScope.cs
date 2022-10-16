@@ -16,6 +16,21 @@ namespace Lesson9.Code
             _container = baseContainer;
         }
 
+        public bool CanResolve<T>()
+        {
+            return _container.CanResolve<T>();
+        }
+
+        public bool CanResolve(string name)
+        {
+            return _container.CanResolve(name);
+        }
+
+        public bool CanResolve(Type type)
+        {
+            return _container.CanResolve(type);
+        }
+
         public object Resolve(string name)
         {
             return _container.Resolve(name);
@@ -68,6 +83,5 @@ namespace Lesson9.Code
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
     }
 }

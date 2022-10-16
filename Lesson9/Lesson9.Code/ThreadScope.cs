@@ -16,6 +16,21 @@ namespace Lesson9.Code
             _threadLocal = new ThreadLocal<IContainer>(() => parentContainer.Resolve<ILifetimeScope>());
         }
 
+        public bool CanResolve(string name)
+        {
+            return _threadLocal.Value.CanResolve(name);
+        }
+
+        public bool CanResolve(Type type)
+        {
+            return _threadLocal.Value.CanResolve(type);
+        }
+
+        public bool CanResolve<T>()
+        {
+            return _threadLocal.Value.CanResolve<T>();
+        }
+
         public object Resolve(string name)
         {
             return _threadLocal.Value.Resolve(name);
