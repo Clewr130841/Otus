@@ -7,6 +7,6 @@ namespace Lesson12.Code
     {
         T Adapt<T>(IUObject uObject, IContainer container);
         void AdaptStrategyForPropery<T>(IContainer container, string propertyName, Func<IContainer, IUObject, T> get, Action<IContainer, IUObject, T> set);
-        void RemoveAdaptedStrategyForProperty(IContainer container, string propertyName, PropertyTypeEnum propTypeEnum);
+        void RemoveAdaptedStrategyForProperty<T>(IContainer container, string propertyName, PropertyTypeEnum propTypeEnum);
     }
 }

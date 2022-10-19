@@ -77,7 +77,7 @@ namespace Lesson12.Tests
 
             Assert.DoesNotThrow(() =>
             {
-                _factory.RemoveAdaptedStrategyForProperty(_container, nameof(IMovable.Position), PropertyTypeEnum.Get | PropertyTypeEnum.Set);
+                _factory.RemoveAdaptedStrategyForProperty<Vector2>(_container, nameof(IMovable.Position), PropertyTypeEnum.Get | PropertyTypeEnum.Set);
             });
 
             adapter.Position = new Vector2(100, 100);
@@ -97,9 +97,9 @@ namespace Lesson12.Tests
             Assert.Throws<ArgumentNullException>(() => _factory.AdaptStrategyForPropery(_container, null, get, set));
             Assert.Throws<AggregateException>(() => _factory.AdaptStrategyForPropery<Vector2>(_container, "propName", null, null));
 
-            Assert.Throws<ArgumentException>(() => _factory.RemoveAdaptedStrategyForProperty(_container, "test", (PropertyTypeEnum)0));
-            Assert.Throws<ArgumentNullException>(() => _factory.RemoveAdaptedStrategyForProperty(null, "test", PropertyTypeEnum.Get));
-            Assert.Throws<ArgumentNullException>(() => _factory.RemoveAdaptedStrategyForProperty(_container, null, PropertyTypeEnum.Get));
+            Assert.Throws<ArgumentException>(() => _factory.RemoveAdaptedStrategyForProperty<Vector2>(_container, "test", (PropertyTypeEnum)0));
+            Assert.Throws<ArgumentNullException>(() => _factory.RemoveAdaptedStrategyForProperty<Vector2>(null, "test", PropertyTypeEnum.Get));
+            Assert.Throws<ArgumentNullException>(() => _factory.RemoveAdaptedStrategyForProperty<Vector2>(_container, null, PropertyTypeEnum.Get));
         }
     }
 }

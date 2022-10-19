@@ -26,7 +26,7 @@ adapter.Position = new System.Numerics.Vector2(100, 100);
 
 var pos1 = adapter.Position;
 
-buildFactory.RemoveAdaptedStrategyForProperty(container, nameof(IMovable.Position), PropertyTypeEnum.Get | PropertyTypeEnum.Set);
+buildFactory.RemoveAdaptedStrategyForProperty<Vector2>(container, nameof(IMovable.Position), PropertyTypeEnum.Get | PropertyTypeEnum.Set);
 
 adapter.Position = new System.Numerics.Vector2(100, 100);
 

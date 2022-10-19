@@ -102,7 +102,7 @@ namespace Lesson12.Code
             }
         }
 
-        public void RemoveAdaptedStrategyForProperty(IContainer container, string propertyName, PropertyTypeEnum propTypeEnum)
+        public void RemoveAdaptedStrategyForProperty<T>(IContainer container, string propertyName, PropertyTypeEnum propTypeEnum)
         {
             if (container == null)
             {
@@ -122,13 +122,13 @@ namespace Lesson12.Code
             if (propTypeEnum.HasFlag(PropertyTypeEnum.Set))
             {
                 var key = GetStrategyStoreKeyForPropery(propertyName, PropertyTypeEnum.Set);
-                container.Resolve<IRegistration>().Unregister(key);
+                container.Resolve<IRegistration>().Unregister<T>(key);
             }
 
             if (propTypeEnum.HasFlag(PropertyTypeEnum.Get))
             {
                 var key = GetStrategyStoreKeyForPropery(propertyName, PropertyTypeEnum.Get);
-                container.Resolve<IRegistration>().Unregister(key);
+                container.Resolve<IRegistration>().Unregister<T>(key);
             }
         }
 
