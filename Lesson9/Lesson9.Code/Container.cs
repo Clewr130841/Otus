@@ -14,6 +14,8 @@ namespace Lesson9.Code
 {
     public class Container : IContainer, IDisposable
     {
+        private Guid _guid = Guid.NewGuid();
+
         /// <summary>
         /// На всякий случай конкурентный словарь, для избежания ошибок при создании и регистрации с разных потоков;
         /// </summary>
@@ -33,6 +35,11 @@ namespace Lesson9.Code
             RegisterServiceTypesAndScope();
         }
 
+        public bool CanResolve<T>(string name)
+        {
+            return CanResolve(typeof(T), name);
+        }
+
         public bool CanResolve<T>()
         {
             return CanResolve(typeof(T));
@@ -49,26 +56,27 @@ namespace Lesson9.Code
             return CanResolveInner(key);
         }
 
-        public bool CanResolve(string name)
+        public bool CanResolve(Type type, string name)
         {
-            if (name == null)
+            if (type == null)
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(type));
             }
 
-            var key = GetResolverKey(name);
+            var key = GetResolverKey(type, name);
             return CanResolveInner(key);
         }
 
         #region IContainer
-        public object Resolve(string name, object[] args)
+
+        public object Resolve(Type type, string name, object[] args)
         {
             if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
             }
 
-            var key = GetResolverKey(name);
+            var key = GetResolverKey(type, name);
 
 
             var resolver = GetResolver(key);
@@ -81,11 +89,12 @@ namespace Lesson9.Code
                 }
                 catch (Exception ex)
                 {
-                    throw new CantResolveContainerException($"Can't resolve dependency with name \"{name}\"", ex);
+                    return resolver.Resolve(args, this);
+                    throw new CantResolveContainerException($"Can't resolve dependency with name \"{name}\" and type {type.FullName}", ex);
                 }
             }
 
-            throw new CantResolveContainerException($"Dependency \"{name}\" is not registered");
+            throw new CantResolveContainerException($"Dependency \"{name}\" with type {type.FullName} is not registered");
         }
 
         public object Resolve(Type type, params object[] args)
@@ -133,7 +142,7 @@ namespace Lesson9.Code
 
         public T Resolve<T>(string name, params object[] args)
         {
-            return (T)Resolve(name, args);
+            return (T)Resolve(typeof(T), name, args);
         }
 
         #endregion
@@ -171,20 +180,14 @@ namespace Lesson9.Code
                 .Complete();
         }
 
-        private string GetResolverKey(string name)
-        {
-            return $"n:{name}";
-        }
-
         private string GetResolverKey(Type type)
         {
             return $"t:{type.FullName}";
         }
 
-        private void RegisterResolver(string name, ResolverBase constructor) //Оставим виртуальным, для наследников
+        private string GetResolverKey(Type type, string name)
         {
-            var key = GetResolverKey(name);
-            _resolvers[key] = constructor;
+            return $"tn:t:{type.FullName}:n:{name}";
         }
 
         private void RegisterResolver(Type type, ResolverBase constructor) //Оставим виртуальным, для наследников
@@ -193,9 +196,15 @@ namespace Lesson9.Code
             _resolvers[key] = constructor;
         }
 
-        private void UnregisterResolver(string name) //Оставим виртуальным, для наследников
+        private void RegisterResolver(Type type, string name, ResolverBase constructor) //Оставим виртуальным, для наследников
         {
-            var key = GetResolverKey(name);
+            var key = GetResolverKey(type, name);
+            _resolvers[key] = constructor;
+        }
+
+        private void UnregisterResolver(Type type, string name) //Оставим виртуальным, для наследников
+        {
+            var key = GetResolverKey(type, name);
             _resolvers.TryRemove(key, out _);
         }
 
@@ -249,12 +258,12 @@ namespace Lesson9.Code
                     throw new ArgumentNullException(nameof(type));
                 }
 
-                if (type.IsInterface)
+                if (_constr == null && type.IsInterface)
                 {
                     throw new ArgumentException($"Argument {type.FullName} cant be an interface type");
                 }
 
-                if (type.IsAbstract)
+                if (_constr == null && type.IsAbstract)
                 {
                     throw new ArgumentException($"Argument {type.FullName} cant be an abstract type");
                 }
@@ -287,8 +296,19 @@ namespace Lesson9.Code
                     throw new ArgumentNullException(nameof(constr));
                 }
 
-                As<T>();
+
                 _constr = (c, a) => constr(c, a);
+
+                try
+                {
+                    As<T>();
+                }
+                catch (Exception ex)
+                {
+                    _constr = null;
+                    throw ex;
+                }
+                
                 return this;
             }
             public IRegistrationOption As<T>(Func<IContainer, T> constr)
@@ -393,7 +413,7 @@ namespace Lesson9.Code
                 }
                 else
                 {
-                    _container.RegisterResolver(_name, resolver);
+                    _container.RegisterResolver(_forType, _name, resolver);
                 }
             }
             #endregion
@@ -423,6 +443,12 @@ namespace Lesson9.Code
                 return new RegistrationOptions(type, _container);
             }
 
+            public IRegistration RegisterModule(IContainerModule module)
+            {
+                module.RegisterModule(this);
+                return this;
+            }
+
             public void Unregister<T>()
             {
                 _container.UnregisterResolver(typeof(T));
@@ -433,9 +459,14 @@ namespace Lesson9.Code
                 _container.UnregisterResolver(t);
             }
 
-            public void Unregister(string name)
+            public void Unregister(Type t, string name)
             {
-                _container.UnregisterResolver(name);
+                _container.UnregisterResolver(t, name);
+            }
+
+            public void Unregister<T>(string name)
+            {
+                Unregister(typeof(T), name);
             }
         }
 
