@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lesson8\Lesson8.Code\Lesson8.Code.csproj" />
+    <ProjectReference Include="..\..\Lesson9\Lesson9.Code\Lesson9.Code.csproj" />
+  </ItemGroup>
+
+</Project>
