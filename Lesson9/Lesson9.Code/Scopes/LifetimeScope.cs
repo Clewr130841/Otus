@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Xml.Linq;
@@ -21,34 +22,29 @@ namespace Lesson9.Code.Scopes
             return _container.CanResolve<T>();
         }
 
-        public bool CanResolve(string name)
-        {
-            return _container.CanResolve(name);
-        }
-
         public bool CanResolve(Type type)
         {
             return _container.CanResolve(type);
         }
 
-        public object Resolve(string name)
+        public bool CanResolve<T>(string name)
         {
-            return _container.Resolve(name);
+            return _container.CanResolve<T>(name);
         }
 
-        public object Resolve(string name, params object[] args)
+        public bool CanResolve(Type type, string name)
         {
-            return _container.Resolve(name, args);
+            return _container.CanResolve(type, name);
+        }
+
+        public object Resolve(Type type, string name, params object[] args)
+        {
+            return _container.Resolve(type, name, args);
         }
 
         public object Resolve(Type type, params object[] args)
         {
             return _container.Resolve(type, args);
-        }
-
-        public T Resolve<T>()
-        {
-            return _container.Resolve<T>();
         }
 
         public T Resolve<T>(params object[] args)

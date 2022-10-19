@@ -8,9 +8,11 @@ namespace Lesson9.Code
     {
         IRegistrationOption Register<T>();
         IRegistrationOption Register(Type type);
+        IRegistration RegisterModule(IContainerModule module);
 
         void Unregister<T>();
+        void Unregister<T>(string name);
         void Unregister(Type t);
-        void Unregister(string name);
+        void Unregister(Type t, string name);
     }
 }
