@@ -178,7 +178,7 @@ namespace Lesson12.Code
                 if (prop.CanRead)
                 {
                     var key = GetStrategyStoreKeyForPropery(prop.Name, PropertyTypeEnum.Get);
-                    var canResolve = $"_c.CanResolve(\"{key}\")";
+                    var canResolve = $"_c.CanResolve<{prop.PropertyType.Name}>(\"{key}\")";
                     var getProp = $"_o.{nameof(IUObject.GetProperty)}<{prop.PropertyType.Name}>(\"{prop.Name}\")";
                     var resolveProp = $"_c.Resolve<{prop.PropertyType.Name}>(\"{key}\", _o)";
 
@@ -190,8 +190,8 @@ namespace Lesson12.Code
                 if (prop.CanWrite)
                 {
                     var key = GetStrategyStoreKeyForPropery(prop.Name, PropertyTypeEnum.Set);
-                    var canResolve = $"_c.CanResolve(\"{key}\")";
-                    var resolveProp = $"_c.Resolve(\"{key}\", _o, value)";
+                    var canResolve = $"_c.CanResolve<{prop.PropertyType.Name}>(\"{key}\")";
+                    var resolveProp = $"_c.Resolve<{prop.PropertyType.Name}>(\"{key}\", _o, value)";
                     var setProp = $"_o.{nameof(IUObject.SetProperty)}<{prop.PropertyType.Name}>(\"{prop.Name}\", value)";
 
                     sb.AppendLine($"\t\tset{{");
