@@ -1,3 +1,4 @@
+using Lesson12.Code;
 using Lesson16.Code;
 using Lesson16.Code.Commands;
 using Lesson16.Code.Handlers;
@@ -57,10 +58,14 @@ namespace Lesson16.Tests
                 }}
             }}";
 
+            IMessageHandlerResponse response = null;
+
             Assert.DoesNotThrow(() =>
             {
-                messageEp.HandleMessage(jsonMessage); //this message will be added and executed in the game loop
+                response = messageEp.HandleMessage(jsonMessage); //this message will be added and executed in the game loop
             });
+
+            Assert.That(response.Success, response.Error);
 
             _container.Resolve<IGameLoop>().Stop(); //soft stop the game loop
             _container.Resolve<IGameLoop>().Wait(); //wait for all commands to complete
@@ -76,27 +81,112 @@ namespace Lesson16.Tests
         {
             var messageEp = _container.Resolve<IMessageEndpoint>();
 
-            var json = "fsdfsdf";
-            Assert.Throws<JsonReaderException>(() =>
+            //Test bad type
+
+            var jsonMessage = @$"{{
+                type:""GAMEOBJECT_COMMAND_TEST"",
+                data:{{
+                    gameGuid: ""{_newGameGuid}"",
+                    gameObjectGuid: ""{_newGameObjectGuid}"",
+                    operation: ""CHANGE_VELOCITY"",
+                    args: [105, 10]
+                }}
+            }}";
+
+            IMessageHandlerResponse response = null;
+
+            Assert.DoesNotThrow(() =>
             {
-                messageEp.HandleMessage(json);
+                response = messageEp.HandleMessage(jsonMessage);
             });
+
+            Assert.That(!response.Success, response.Error);
+
+            //Test bad operation
+
+            jsonMessage = @$"{{
+                type:""GAMEOBJECT_COMMAND"",
+                data:{{
+                    gameGuid: ""{_newGameGuid}"",
+                    gameObjectGuid: ""{_newGameObjectGuid}"",
+                    operation: ""CHANGE_VELOCITY!!!!!!"",
+                    args: [105, 10]
+                }}
+            }}";
+
+            Assert.DoesNotThrow(() =>
+            {
+                response = messageEp.HandleMessage(jsonMessage);
+            });
+
+            Assert.That(!response.Success, response.Error);
+
+
+            //Test bad gameObjectGuid
+
+            jsonMessage = @$"{{
+                type:""GAMEOBJECT_COMMAND"",
+                data:{{
+                    gameGuid: ""{_newGameGuid}"",
+                    gameObjectGuid: ""fsdfsdfsdf"",
+                    operation: ""CHANGE_VELOCITY"",
+                    args: [105, 10]
+                }}
+            }}";
+
+            Assert.DoesNotThrow(() =>
+            {
+                response = messageEp.HandleMessage(jsonMessage);
+            });
+
+            Assert.That(!response.Success, response.Error);
+
+            //Test bad gameGuid
+
+            jsonMessage = @$"{{
+                type:""GAMEOBJECT_COMMAND"",
+                data:{{
+                    gameGuid: ""fgdsgfdg"",
+                    gameObjectGuid: ""{_newGameObjectGuid}"",
+                    operation: ""CHANGE_VELOCITY"",
+                    args: [105, 10]
+                }}
+            }}";
+
+            Assert.DoesNotThrow(() =>
+            {
+                response = messageEp.HandleMessage(jsonMessage);
+            });
+
+            Assert.That(!response.Success, response.Error);
+
+            //Test error JSON
+            jsonMessage = @$"dasdasd";
+
+            Assert.DoesNotThrow(() =>
+            {
+                response = messageEp.HandleMessage(jsonMessage);
+            });
+
+            Assert.That(!response.Success, response.Error);
         }
 
         [Test]
-        public void TestCreation()
+        public void TestNullArgumentException()
         {
             Assert.Throws<ArgumentNullException>(() => new MessageEndpoint(null));
             Assert.Throws<ArgumentNullException>(() => new GameAsyncLoop(null));
             Assert.Throws<ArgumentNullException>(() => new Game(null));
             Assert.Throws<ArgumentNullException>(() => new GameCommandHandler(null));
-            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(null, new GameCommandData(), _container));
-            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(_game, null, _container));
-            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(_game, new GameCommandData(), null));
+            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(null, _container.Resolve<IUObject>(), new GameCommandData(), _container));
+            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(_game, null, new GameCommandData(), _container));
+            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(_game, _container.Resolve<IUObject>(), null, _container));
+            Assert.Throws<ArgumentNullException>(() => new InterpretCommand(_game, _container.Resolve<IUObject>(), new GameCommandData(), null));
 
-            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(null, Guid.Empty, new object[0], _container));
-            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(_game, Guid.Empty, null, _container));
-            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(_game, Guid.Empty, new object[0], null));
+            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(null, _container.Resolve<IUObject>(), new object[0], _container));
+            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(_game, null, new object[0], _container));
+            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(_game, _container.Resolve<IUObject>(), null, _container));
+            Assert.Throws<ArgumentNullException>(() => new ChangeVelocityAdaptCommand(_game, _container.Resolve<IUObject>(), new object[0], null));
         }
     }
 }

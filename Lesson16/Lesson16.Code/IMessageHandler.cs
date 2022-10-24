@@ -6,6 +6,6 @@ namespace Lesson16.Code
 {
     public interface IMessageHandler
     {
-        void HandleMessageJson(string dataJson);
+        object HandleMessageJson(string dataJson);
     }
 }

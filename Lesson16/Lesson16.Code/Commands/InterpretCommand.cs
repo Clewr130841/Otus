@@ -1,7 +1,9 @@
-﻿using Lesson14.Code.Loops;
+﻿using Lesson12.Code;
+using Lesson14.Code.Loops;
 using Lesson16.Code.Handlers;
 using Lesson5.Code.Commands;
 using Lesson9.Code;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +16,17 @@ namespace Lesson16.Code.Commands
     {
         IGameCommandData _gameCommandData;
         IContainer _container;
-        IGame _game;
-        public InterpretCommand(IGame game, IGameCommandData gameCommandData, IContainer container)
+        IUObject _uObject;
+        public InterpretCommand(IGame game, IUObject uObject, IGameCommandData gameCommandData, IContainer container)
         {
             if (game == null)
             {
                 throw new ArgumentNullException(nameof(game));
+            }
+
+            if (uObject == null)
+            {
+                throw new ArgumentNullException(nameof(uObject));
             }
 
             if (gameCommandData == null)
@@ -32,16 +39,23 @@ namespace Lesson16.Code.Commands
                 throw new ArgumentNullException(nameof(container));
             }
 
-            _game = game;
+            _uObject = uObject;
             _gameCommandData = gameCommandData;
             _container = container;
         }
 
         public void Execute()
         {
-            var command = _container.Resolve<ICommand>(_gameCommandData.Operation, new object[] { _game, _gameCommandData.GameObjectGuid, _gameCommandData.Args });
-            var loop = _container.Resolve<IGameLoop>();
-            loop.Enqueue(command);
+            if (_container.CanResolve<ICommand>(_gameCommandData.Operation))
+            {
+                var command = _container.Resolve<ICommand>(_gameCommandData.Operation, new object[] { _uObject, _gameCommandData.GameObjectGuid, _gameCommandData.Args });
+                var loop = _container.Resolve<IGameLoop>();
+                loop.Enqueue(command);
+            }
+            else
+            {
+                throw new ExceptionWithCode(400, $"Can't find operation {_gameCommandData.Operation}");
+            }
         }
     }
 }
