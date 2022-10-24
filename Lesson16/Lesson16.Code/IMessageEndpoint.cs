@@ -2,6 +2,6 @@
 {
     public interface IMessageEndpoint
     {
-        void HandleMessage(string messageJson);
+        IMessageHandlerResponse HandleMessage(string messageJson);
     }
 }
