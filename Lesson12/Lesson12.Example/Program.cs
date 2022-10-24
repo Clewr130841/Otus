@@ -15,19 +15,5 @@ var uObject = new UObject();
 
 var adapter = buildFactory.Adapt<IMovable>(uObject, container);
 
-buildFactory.AdaptStrategyForPropery(
-    container,
-    nameof(IMovable.Position),
-    (c, u) => u.GetProperty<Vector2>(nameof(IMovable.Position)),
-    (c, u, v) => u.SetProperty(nameof(IMovable.Position), v + Vector2.One)
-);
 
-adapter.Position = new System.Numerics.Vector2(100, 100);
-
-var pos1 = adapter.Position;
-
-buildFactory.RemoveAdaptedStrategyForProperty<Vector2>(container, nameof(IMovable.Position), PropertyTypeEnum.Get | PropertyTypeEnum.Set);
-
-adapter.Position = new System.Numerics.Vector2(100, 100);
-
-var pos2 = adapter.Position;
+adapter.Position = new Vector2(100, 100);

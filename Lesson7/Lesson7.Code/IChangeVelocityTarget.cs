@@ -8,6 +8,6 @@ namespace Lesson7.Code
     public interface IChangeVelocityTarget
     {
         Vector2 Velocity { set; }
-        Vector2 NewVelocity { get; }
+        Vector2 NewVelocity { get; set; }
     }
 }
