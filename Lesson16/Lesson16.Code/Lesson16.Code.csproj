@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lesson12\Lesson12.Code\Lesson12.Code.csproj" />
+    <ProjectReference Include="..\..\Lesson14\Lesson14.Code\Lesson14.Code.csproj" />
+    <ProjectReference Include="..\..\Lesson7\Lesson7.Code\Lesson7.Code.csproj" />
+    <ProjectReference Include="..\..\Lesson9\Lesson9.Code\Lesson9.Code.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+</Project>

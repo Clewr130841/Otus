@@ -27,6 +27,16 @@ namespace Lesson14.Code.Loops
         CancellationTokenSource _cancellationTokenSource;
         public AsyncLoop(string loopKey, IContainer container)
         {
+            if (loopKey == null)
+            {
+                throw new ArgumentNullException(nameof(loopKey));
+            }
+
+            if (container == null)
+            {
+                throw new ArgumentNullException(nameof(container));
+            }
+
             _cancellationTokenSource = new CancellationTokenSource();
 
             _container = container.Resolve<ILifetimeScope>(); // Для лупа лучше сделать свой скоуп
