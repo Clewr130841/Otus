@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.24.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.24.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lesson16\Lesson16.Code\Lesson16.Code.csproj" />
+    <ProjectReference Include="..\Lesson19.CrossLib\Lesson19.CrossLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Lesson9.Code">
+      <HintPath>..\..\Lesson9\Lesson9.Code\bin\Debug\netstandard2.1\Lesson9.Code.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

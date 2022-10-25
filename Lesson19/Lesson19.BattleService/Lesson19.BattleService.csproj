@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lesson16\Lesson16.Code\Lesson16.Code.csproj" />
+    <ProjectReference Include="..\Lesson19.CrossLib\Lesson19.CrossLib.csproj" />
+  </ItemGroup>
+
+</Project>

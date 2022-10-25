@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lesson9\Lesson9.Code\Lesson9.Code.csproj" />
+    <ProjectReference Include="..\Lesson19.AuthService\Lesson19.AuthService.csproj" />
+    <ProjectReference Include="..\Lesson19.BattleService\Lesson19.BattleService.csproj" />
+  </ItemGroup>
+
+</Project>
